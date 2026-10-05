@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title id="docTitle">ClubGestor — Gestión Deportiva</title>
+<style>
+:root{--primary:#166534;--primary2:#14532d;--bg:#f3f6f4;--card:#fff;--text:#172018;--muted:#68746b;--line:#dfe7e1;--danger:#b91c1c;--dangerbg:#fee2e2;--ok:#166534;--okbg:#dcfce7;--warn:#92400e;--warnbg:#fef3c7}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}.sidebar{width:240px;background:#10251a;color:#fff;padding:20px 14px;position:fixed;top:0;bottom:0}.brand{padding:8px 10px 24px;font-size:23px;font-weight:800}.brand small{display:block;color:#a7f3d0;font-size:10px;margin-top:4px;letter-spacing:.5px}
+.nav button{display:block;width:100%;background:transparent;border:0;color:#d1fae5;text-align:left;padding:12px;border-radius:9px;margin:3px 0;font-size:14px;cursor:pointer}.nav button:hover,.nav button.active{background:#1f3a29;color:#fff}.main{margin-left:240px;width:calc(100% - 240px);padding:25px;max-width:1500px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.top h1{margin:0;font-size:27px}.top p{margin:5px 0;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:9px 13px;border-radius:8px;cursor:pointer}button.primary{background:var(--primary);color:#fff;border-color:var(--primary)}button.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px;box-shadow:0 2px 7px #10251a0b}.num{font-size:29px;font-weight:800}.label{font-size:12px;color:var(--muted)}.kpi{min-height:105px}.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:14px 0}.left,.right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;background:#fff;font:inherit}textarea{width:100%;min-height:80px;padding:10px;border:1px solid #cfd8d1;border-radius:8px;font:inherit}.field{margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.span2{grid-column:span 2}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}table{border-collapse:collapse;width:100%;min-width:850px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{font-size:11px;text-transform:uppercase;background:#f7faf8;color:#526158}tr:hover td{background:#fbfdfb}.pill{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700}.green{background:var(--okbg);color:var(--ok)}.red{background:var(--dangerbg);color:var(--danger)}.yellow{background:var(--warnbg);color:var(--warn)}.muted{color:var(--muted)}.empty{text-align:center;padding:35px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:#10251a99;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:#fff;border-radius:14px;padding:20px;width:min(780px,100%);max-height:92vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0 0 16px}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
+.logoBox{display:flex;align-items:center;gap:15px}.logoPreview{width:80px;height:80px;object-fit:contain;border:1px dashed #aab6ad;border-radius:12px;background:#fafcfb}.clubHero{display:flex;align-items:center;gap:15px}.clubHero img{width:70px;height:70px;object-fit:contain;border-radius:12px}.statusBtn{min-width:100px}.attendanceGrid{display:grid;grid-template-columns:1fr 150px 1fr;gap:8px;align-items:center;padding:9px;border-bottom:1px solid var(--line)}.attMatrix th,.attMatrix td{text-align:center;white-space:nowrap;padding:7px 5px}.attMatrix th:first-child,.attMatrix td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:2}.attDay{min-width:48px;line-height:1.15}.attDay small{display:block;font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase}.attDay.weekend{background:#f1f5f9}.attDay.sunday{background:#fef2f2;color:#991b1b}.attDay.saturday{background:#fff7ed;color:#9a3412}.attCell.weekend{box-shadow:inset 0 -3px 0 #cbd5e1}.attCell.sunday{box-shadow:inset 0 -3px 0 #fca5a5}.attCell.saturday{box-shadow:inset 0 -3px 0 #fdba74}.attCell{width:34px;height:32px;padding:0;border-radius:7px;font-size:11px;font-weight:800}.attP{background:var(--okbg);color:var(--ok);border-color:#bbf7d0}.attA{background:var(--dangerbg);color:var(--danger);border-color:#fecaca}.attE{background:var(--warnbg);color:var(--warn);border-color:#fde68a}.attR{background:#ffedd5;color:#9a3412;border-color:#fed7aa}.attEmpty{background:#f3f4f6;color:#6b7280;border-color:#e5e7eb}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:10px}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}.monthTitle{font-size:18px;font-weight:800}.summaryMini{font-size:11px;color:var(--muted);margin-top:2px}
+
+.printOnly{display:none}.printReport{font-family:Arial,sans-serif;color:#111}.printReport h1{margin:0;font-size:22px}.printReport h2{margin:4px 0 2px;font-size:17px}.printReport p{margin:3px 0}.printHeader{display:flex;align-items:center;gap:14px;border-bottom:2px solid #166534;padding-bottom:10px;margin-bottom:14px}.printHeader img{width:70px;height:70px;object-fit:contain}.printMeta{font-size:11px;color:#555}.printReport table{min-width:0;width:100%;border-collapse:collapse}.printReport th,.printReport td{border:1px solid #bbb;padding:5px 4px;font-size:8.5px;text-align:center}.printReport th{background:#eee}.printReport td:first-child,.printReport th:first-child{text-align:left}.printFoot{margin-top:12px;font-size:9px;color:#555}.printPage{padding:0}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}}@media(max-width:650px){.app{display:block}.sidebar{position:static;width:100%}.main{margin:0;width:100%;padding:14px}.grid,.grid2,.formgrid{grid-template-columns:1fr}.span2{grid-column:auto}.top{display:block}.actions{margin-top:10px}.nav{display:grid;grid-template-columns:1fr 1fr}}
+@media print{body{background:#fff!important}.app,.modal{display:none!important}.printOnly{display:block!important}.printReport{display:block!important;width:100%;padding:0;margin:0}.printReport table{page-break-inside:auto}.printReport tr{page-break-inside:avoid;page-break-after:auto}.printReport thead{display:table-header-group}@page{size:A4 landscape;margin:8mm}}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111827">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand" id="appBrand">ClubGestor<small>GESTIÓN DEL CLUB</small></div>
+<nav class="nav">
+<button data-page="home">🏠 Inicio</button>
+<button data-page="athletes">👥 Deportistas</button>
+<button data-page="attendance">✅ Asistencia</button>
+<button data-page="payments">💳 Mensualidades</button>
+<button data-page="club">🏷️ Club y logo</button>
+</nav>
+</aside>
+<main class="main"><div id="app"></div></main>
+</div>
+<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle"></h2><button type="button" onclick="closeModal()">✕</button></div><div id="modalBody"></div><div class="modalfoot"><button type="button" onclick="closeModal()">Cancelar</button><button class="primary" id="modalSave">Guardar</button></div></div></div>
+<script>
+const KEY='clubgestor_v2';
+const seed={appName:'ClubGestor V2',club:{name:'Mi Club Deportivo',logo:''},athletes:[],attendance:[],payments:[]};
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
+db.appName=db.appName||'ClubGestor V2';
+db.club=db.club||{name:'Mi Club Deportivo',logo:''};
+db.athletes=db.athletes||[];db.attendance=db.attendance||[];db.payments=db.payments||[];
+let page='home';
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function syncAppName(){const n=db.appName||'ClubGestor V2';document.getElementById('appBrand').innerHTML=esc(n)+'<small>GESTIÓN DEL CLUB</small>';document.getElementById('docTitle').textContent=n+' — Gestión Deportiva'}
+
+function uid(p){return p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function openModal(title,body,saveFn){modalTitle.textContent=title;modalBody.innerHTML=body;modalSave.onclick=saveFn;modal.classList.add('open')}
+function closeModal(){modal.classList.remove('open')}
+function header(title,sub,actions=''){return `<div class="top"><div><h1>${title}</h1><p>${sub}</p></div><div class="actions">${actions}</div></div>`}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;render()});
+
+function render(){
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ ({home,athletes,attendance,payments,club}[page]||home)();
+}
+
+function home(){
+ const today=new Date().toISOString().slice(0,10);
+ const present=db.attendance.filter(x=>x.date===today&&x.status==='P').length;
+ const paid=db.payments.filter(x=>x.paid&&x.year===new Date().getFullYear()&&x.month===new Date().getMonth()+1).length;
+ document.getElementById('app').innerHTML=header('Inicio',`Bienvenido a ${esc(db.club.name)}`,
+ `<button class="primary" onclick="openAthlete()">+ Deportista</button>`) +
+ `<div class="card clubHero" style="margin-bottom:14px;justify-content:space-between"><div class="clubHero">${db.club.logo?`<img src="${db.club.logo}" alt="Logo del club">`:'<div style="font-size:48px">🏆</div>'}<div><div class="label">CLUB</div><h2 style="margin:2px 0 4px">${esc(db.club.name)}</h2><p class="muted" style="margin:0">Control de deportistas, asistencia y mensualidades.</p></div></div><button onclick="page='club';render()">✏️ Editar club</button></div>
+ <div class="grid"><div class="card kpi"><div class="label">DEPORTISTAS</div><div class="num">${db.athletes.length}</div></div>
+ <div class="card kpi"><div class="label">PRESENTES HOY</div><div class="num">${present}</div></div>
+ <div class="card kpi"><div class="label">PAGOS ESTE MES</div><div class="num">${paid}</div></div>
+ <div class="card kpi"><div class="label">PENDIENTES ESTE MES</div><div class="num">${Math.max(0,db.athletes.length-paid)}</div></div></div>
+ <div style="height:14px"></div><div class="grid2"><div class="card"><h3>Acciones rápidas</h3><p><button class="primary" onclick="openAthlete()">Agregar deportista</button></p><p><button onclick="openAttendance()">Registrar asistencia</button></p><p><button onclick="payments()">Ver mensualidades</button></p></div>
+ <div class="card"><h3>Estado del club</h3><p class="muted">Puedes cambiar el nombre y cargar el logo desde <b>Club y logo</b>.</p><button onclick="page='club';render()">Configurar club</button></div></div>`;
+}
+
+function athletes(){
+ document.getElementById('app').innerHTML=header('Deportistas','Registro completo de los integrantes del club',`<button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`) +
+ `<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><div class="right"><span class="muted">${db.athletes.length} deportistas</span></div></div>
+ <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th></th></tr></thead><tbody id="athBody"></tbody></table></div>`;
+ renderAthletes();
+}
+function renderAthletes(){
+ const q=(document.getElementById('athSearch')?.value||'').toLowerCase(),body=document.getElementById('athBody');if(!body)return;
+ body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport).toLowerCase().includes(q)).map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth)}</td><td>${esc(a.weight)} kg</td><td>${esc(a.height)} cm</td><td>${esc(a.sport)}</td><td>${esc(a.category)}</td><td>${esc(a.phone)}</td><td><div style="display:flex;gap:5px"><button onclick="editAthlete('${a.id}')">Editar</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`).join('')||'<tr><td colspan=9 class="empty">No hay deportistas registrados.</td></tr>';
+}
+document.addEventListener('input',e=>{if(e.target.id==='athSearch')renderAthletes()});
+function openAthlete(existing=null){
+ const a=existing||{name:'',docType:'Cédula',document:'',birth:'',weight:'',height:'',sport:'',category:'',address:'',phone:'',eps:''};
+ openModal(existing?'Editar deportista':'Nuevo deportista',`<div class="formgrid">
+ <div class="field span2"><label>Nombre completo *</label><input id="aName" value="${esc(a.name)}"></div>
+ <div class="field"><label>Tipo de documento *</label><select id="aDocType"><option ${a.docType==='Cédula'?'selected':''}>Cédula</option><option ${a.docType==='Tarjeta de identidad'?'selected':''}>Tarjeta de identidad</option><option>Pasaporte</option><option>Otro</option></select></div>
+ <div class="field"><label>Número *</label><input id="aDoc" value="${esc(a.document)}"></div>
+ <div class="field"><label>Fecha de nacimiento</label><input id="aBirth" type="date" value="${esc(a.birth)}"></div>
+ <div class="field"><label>Peso (kg)</label><input id="aWeight" type="number" min="0" step=".1" value="${esc(a.weight)}"></div>
+ <div class="field"><label>Talla (cm)</label><input id="aHeight" type="number" min="0" step=".1" value="${esc(a.height)}"></div>
+ <div class="field"><label>Deporte</label><select id="aSport"><option>Fútbol</option><option>Baloncesto</option><option>Voleibol</option><option>Bádminton</option><option>Atletismo</option><option>Natación</option><option>Ciclismo</option><option>Otro deporte</option></select></div>
+ <div class="field"><label>Si es otro deporte, indique cuál</label><input id="aOtherSport" value="${esc(a.otherSport||'')}"></div>
+ <div class="field"><label>Categoría</label><input id="aCat" value="${esc(a.category)}" placeholder="Ej. Sub-15, Sub-17, Mayores"></div>
+ <div class="field span2"><label>Dirección</label><input id="aAddress" value="${esc(a.address)}"></div>
+ <div class="field"><label>Celular</label><input id="aPhone" value="${esc(a.phone)}"></div>
+ <div class="field"><label>EPS</label><input id="aEps" value="${esc(a.eps)}"></div>
+ </div>`,()=>{
+ const x={...a,id:a.id||uid('ath'),name:aName.value.trim(),docType:aDocType.value,document:aDoc.value.trim(),birth:aBirth.value,weight:aWeight.value,height:aHeight.value,sport:aSport.value,otherSport:aOtherSport.value.trim(),category:aCat.value.trim(),address:aAddress.value.trim(),phone:aPhone.value.trim(),eps:aEps.value.trim()};
+ if(!x.name||!x.document)return alert('Nombre y número de documento son obligatorios.');
+ if(x.sport==='Otro deporte'&&!x.otherSport)return alert('Indique cuál es el otro deporte.');
+ if(existing)db.athletes=db.athletes.map(z=>z.id===a.id?x:z);else db.athletes.push(x);save();closeModal();render();
+ });
+ document.getElementById('aSport').value=a.sport||'Fútbol';
+}
+function editAthlete(id){openAthlete(db.athletes.find(a=>a.id===id))}
+function deleteAthlete(id){
+ const a=db.athletes.find(x=>x.id===id);if(!a)return;
+ if(!confirm(`¿Eliminar a ${a.name}? También se eliminarán sus registros de asistencia y mensualidades.`))return;
+ db.athletes=db.athletes.filter(x=>x.id!==id);db.attendance=db.attendance.filter(x=>x.athleteId!==id);db.payments=db.payments.filter(x=>x.athleteId!==id);save();render();
+}
+
+function attendance(){
+ const d=new Date(),year=d.getFullYear(),month=d.getMonth()+1;
+ document.getElementById('app').innerHTML=header('Asistencia','Control diario de asistencia organizado por mes',`<button onclick="printAttendancePDF()">🖨️ Imprimir / PDF</button><button class="primary" onclick="openAttendance()">+ Registrar día</button>`) +
+ `<div class="card"><div class="toolbar"><div class="left"><select id="attYear" style="width:110px">${[year-1,year,year+1].map(y=>`<option ${y===year?'selected':''}>${y}</option>`).join('')}</select><select id="attMonth" style="width:170px">${['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'].map((m,i)=>`<option value="${i+1}" ${i+1===month?'selected':''}>${m}</option>`).join('')}</select></div><div class="right"><span class="monthTitle" id="attMonthTitle"></span></div></div>
+ <div id="attStats" class="muted" style="margin-bottom:10px"></div>
+ <div class="tablewrap"><table class="attMatrix"><thead id="attHead"></thead><tbody id="attBody"></tbody></table></div>
+ <div class="legend"><span><i class="attP"></i>P = Presente</span><span><i class="attA"></i>I = Inasistencia</span><span><i class="attE"></i>E = Excusa</span><span><i class="attR"></i>R = Retardo</span><span><i class="attEmpty"></i>· = Sin registrar</span><span>📅 Lun–Vie = días de entrenamiento</span><span>🟠 Sáb · 🔴 Dom = fin de semana</span></div></div>`;
+ renderAttendance();
+}
+function daysInMonth(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate()}
+function dateKey(y,m,day){return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`}
+function weekdayShort(y,m,day){return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][new Date(Date.UTC(y,m-1,day)).getUTCDay()]}
+function dayClass(y,m,day){const w=new Date(Date.UTC(y,m-1,day)).getUTCDay();return w===0?'sunday weekend':w===6?'saturday weekend':''}
+function attInfo(id,date){return db.attendance.find(x=>x.athleteId===id&&x.date===date)}
+function renderAttendance(){
+ const y=Number(document.getElementById('attYear')?.value),m=Number(document.getElementById('attMonth')?.value),head=document.getElementById('attHead'),body=document.getElementById('attBody');if(!head||!body)return;
+ const days=daysInMonth(y,m);
+ document.getElementById('attMonthTitle').textContent=`${['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][m-1]} ${y}`;
+ head.innerHTML=`<tr><th>Deportista</th><th>Deporte</th>${Array.from({length:days},(_,i)=>{const d=i+1,c=dayClass(y,m,d);return `<th class="attDay ${c}"><small>${weekdayShort(y,m,d)}</small>${d}</th>`}).join('')}<th>Presentes</th><th>Inasist.</th><th>Excusas</th><th>Retardos</th><th>%</th></tr>`;
+ let totals={P:0,A:0,E:0,R:0};
+ body.innerHTML=db.athletes.map(a=>{
+   const rows=Array.from({length:days},(_,i)=>{const date=dateKey(y,m,i+1),r=attInfo(a.id,date),st=r?.status||'',cls=st==='P'?'attP':st==='A'?'attA':st==='E'?'attE':st==='R'?'attR':'attEmpty',label=st==='A'?'I':st||'·';if(st)totals[st]++;return `<td><button type="button" class="attCell ${cls} ${dayClass(y,m,i+1)}" title="${date} (${weekdayShort(y,m,i+1)}): ${st==='P'?'Presente':st==='A'?'Inasistencia':st==='E'?'Excusa':st==='R'?'Retardo':'Sin registrar'}" onclick="cycleAttendance('${a.id}','${date}')">${label}</button></td>`}).join('');
+   const rec=db.attendance.filter(x=>x.athleteId===a.id&&x.date>=`${y}-${String(m).padStart(2,'0')}-01`&&x.date<=`${y}-${String(m).padStart(2,'0')}-${String(days).padStart(2,'0')}`);
+   const p=rec.filter(x=>x.status==='P').length,aa=rec.filter(x=>x.status==='A').length,e=rec.filter(x=>x.status==='E').length,r=rec.filter(x=>x.status==='R').length,base=p+aa+e+r,pct=base?Math.round(p/base*100):0;
+   return `<tr><td><b>${esc(a.name)}</b><div class="summaryMini">${esc(a.category||'')}</div></td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td>${rows}<td><span class="pill green">${p}</span></td><td><span class="pill red">${aa}</span></td><td><span class="pill yellow">${e}</span></td><td><span class="pill" style="background:#ffedd5;color:#9a3412">${r}</span></td><td><b>${pct}%</b></td></tr>`;
+ }).join('')||`<tr><td colspan="${days+7}" class="empty">No hay deportistas registrados.</td></tr>`;
+ const totalReg=totals.P+totals.A+totals.E+totals.R;
+ document.getElementById('attStats').textContent=`Registros del mes: ${totalReg} · Presentes: ${totals.P} · Inasistencias: ${totals.A} · Excusas: ${totals.E} · Retardos: ${totals.R}`;
+}
+document.addEventListener('change',e=>{if(e.target.id==='attYear'||e.target.id==='attMonth')renderAttendance()});
+function cycleAttendance(id,date){
+ const order=['','P','A','E','R'];
+ const current=attInfo(id,date)?.status||'';
+ const next=order[(order.indexOf(current)+1)%order.length];
+ db.attendance=db.attendance.filter(x=>!(x.athleteId===id&&x.date===date));
+ if(next)db.attendance.push({id:uid('att'),athleteId:id,date,status:next,note:''});
+ save();renderAttendance();
+}
+function openAttendance(){
+ const date=new Date().toISOString().slice(0,10);
+ const rows=db.athletes.map(a=>`<div class="attendanceGrid"><div><b>${esc(a.name)}</b><br><small class="muted">${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</small></div><select class="attStatus" data-id="${a.id}"><option value="P">Presente</option><option value="A">Inasistencia</option><option value="E">Excusa</option><option value="R">Retardo</option></select><input class="attNote" data-id="${a.id}" placeholder="Observación opcional"></div>`).join('');
+ openModal('Registrar asistencia de un día',`<div class="field"><label>Día del entrenamiento</label><input id="attDate" type="date" value="${date}"></div><div class="card">${rows||'<div class="empty">Primero registre deportistas.</div>'}</div>`,()=>{
+   const date=document.getElementById('attDate').value;if(!date)return alert('Seleccione una fecha.');
+   document.querySelectorAll('.attStatus').forEach(s=>{const id=s.dataset.id,n=document.querySelector(`.attNote[data-id="${id}"]`)?.value||'';db.attendance=db.attendance.filter(x=>!(x.athleteId===id&&x.date===date));db.attendance.push({id:uid('att'),athleteId:id,date,status:s.value,note:n})});
+   save();closeModal();render();
+ });
+}
+
+function payments(){
+ const y=new Date().getFullYear(),m=new Date().getMonth()+1;
+ document.getElementById('app').innerHTML=header('Mensualidades','Control mensual de pagos por deportista',`<button onclick="printPaymentsPDF()">🖨️ Imprimir / PDF</button><button class="primary" onclick="openPayment()">+ Registrar pago</button>`) +
+ `<div class="card"><div class="toolbar"><div class="left"><select id="payYear" style="width:110px">${[y-1,y,y+1].map(v=>`<option ${v===y?'selected':''}>${v}</option>`).join('')}</select><input id="paySearch" placeholder="Buscar deportista..." style="width:260px"></div><span class="muted">Pulsa PAGÓ / DEBE para cambiar el estado.</span></div>
+ <div class="tablewrap"><table><thead><tr><th>Deportista</th><th>Deporte</th>${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody id="payBody"></tbody></table></div></div>`;
+ renderPayments();
+}
+function renderPayments(){
+ const y=Number(document.getElementById('payYear')?.value),q=(document.getElementById('paySearch')?.value||'').toLowerCase(),body=document.getElementById('payBody');if(!body)return;
+ body.innerHTML=db.athletes.filter(a=>a.name.toLowerCase().includes(q)).map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td>${Array.from({length:12},(_,i)=>{const p=db.payments.find(x=>x.athleteId===a.id&&x.year===y&&x.month===i+1);return `<td><button class="statusBtn ${p?.paid?'green':'red'}" onclick="togglePay('${a.id}',${i+1},${y})">${p?.paid?'PAGÓ':'DEBE'}</button></td>`}).join('')}</tr>`).join('')||'<tr><td colspan=14 class="empty">No hay deportistas.</td></tr>';
+}
+document.addEventListener('input',e=>{if(e.target.id==='paySearch')renderPayments()});
+document.addEventListener('change',e=>{if(e.target.id==='payYear')renderPayments()});
+function togglePay(id,month,year){const i=db.payments.findIndex(x=>x.athleteId===id&&x.month===month&&x.year===year);if(i>=0)db.payments.splice(i,1);else db.payments.push({id:uid('pay'),athleteId:id,month,year,paid:true,date:new Date().toISOString().slice(0,10)});save();renderPayments()}
+function openPayment(){
+ openModal('Registrar mensualidad',`<div class="formgrid"><div class="field span2"><label>Deportista</label><select id="pmAth">${db.athletes.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select></div><div class="field"><label>Año</label><input id="pmYear" type="number" value="${new Date().getFullYear()}"></div><div class="field"><label>Mes</label><select id="pmMonth">${['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'].map((x,i)=>`<option value="${i+1}">${x}</option>`).join('')}</select></div><div class="field"><label>Valor</label><input id="pmValue" type="number" min="0"></div><div class="field"><label>Fecha de pago</label><input id="pmDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div></div>`,()=>{const id=pmAth.value,year=Number(pmYear.value),month=Number(pmMonth.value);db.payments=db.payments.filter(x=>!(x.athleteId===id&&x.year===year&&x.month===month));db.payments.push({id:uid('pay'),athleteId:id,year,month,paid:true,value:Number(pmValue.value)||0,date:pmDate.value});save();closeModal();render()})
+}
+
+
+function printShell(title,subtitle,bodyHtml){
+ const report=document.createElement('div');
+ report.id='printReport'; report.className='printOnly printReport printPage';
+ const logo=db.club.logo?`<img src="${db.club.logo}" alt="Logo">`:'';
+ report.innerHTML=`<div class="printHeader">${logo}<div><h1>${esc(db.club.name||'Mi Club Deportivo')}</h1><h2>${esc(title)}</h2><div class="printMeta">${esc(subtitle)}</div></div></div>${bodyHtml}<div class="printFoot">Generado desde ${esc(db.appName||'ClubGestor')} · ${new Date().toLocaleString('es-CO')}</div>`;
+ document.body.appendChild(report);
+ window.print();
+ setTimeout(()=>report.remove(),500);
+}
+function printAttendancePDF(){
+ const y=Number(document.getElementById('attYear')?.value)||new Date().getFullYear();
+ const m=Number(document.getElementById('attMonth')?.value)||new Date().getMonth()+1;
+ const monthName=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][m-1];
+ const days=daysInMonth(y,m);
+ let totals={P:0,A:0,E:0,R:0};
+ const rows=db.athletes.map(a=>{
+   const cells=Array.from({length:days},(_,i)=>{
+     const st=attInfo(a.id,dateKey(y,m,i+1))?.status||''; if(st)totals[st]++;
+     return `<td>${st||'·'}</td>`;
+   }).join('');
+   const rec=db.attendance.filter(x=>x.athleteId===a.id&&x.date>=`${y}-${String(m).padStart(2,'0')}-01`&&x.date<=`${y}-${String(m).padStart(2,'0')}-${String(days).padStart(2,'0')}`);
+   const p=rec.filter(x=>x.status==='P').length,aa=rec.filter(x=>x.status==='A').length,e=rec.filter(x=>x.status==='E').length,r=rec.filter(x=>x.status==='R').length,base=p+aa+e+r,pct=base?Math.round(p/base*100):0;
+   return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td>${cells}<td>${p}</td><td>${aa}</td><td>${e}</td><td>${r}</td><td>${pct}%</td></tr>`;
+ }).join('') || `<tr><td colspan="${days+7}">No hay deportistas registrados.</td></tr>`;
+ const head=`<tr><th>Deportista</th><th>Deporte</th>${Array.from({length:days},(_,i)=>{const d=i+1;return `<th>${weekdayShort(y,m,d)} ${d}</th>`}).join('')}<th>P</th><th>I</th><th>E</th><th>R</th><th>%</th></tr>`;
+ printShell(`Informe de asistencia · ${monthName} ${y}`,`P = Presente · I = Inasistencia · E = Excusa · R = Retardo`, `<table><thead>${head}</thead><tbody>${rows}</tbody></table><p><b>Totales:</b> Presentes ${totals.P} · Inasistencias ${totals.A} · Excusas ${totals.E} · Retardos ${totals.R}</p>`);
+}
+function printPaymentsPDF(){
+ const y=Number(document.getElementById('payYear')?.value)||new Date().getFullYear();
+ const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+ const rows=db.athletes.map(a=>{
+   const cells=Array.from({length:12},(_,i)=>{const p=db.payments.find(x=>x.athleteId===a.id&&x.year===y&&x.month===i+1);return `<td>${p?.paid?'PAGÓ':'DEBE'}</td>`}).join('');
+   return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td>${cells}</tr>`;
+ }).join('') || '<tr><td colspan="14">No hay deportistas registrados.</td></tr>';
+ const head=`<tr><th>Deportista</th><th>Deporte</th>${months.map(x=>`<th>${x}</th>`).join('')}</tr>`;
+ const total= db.athletes.length*12;
+ const paid=db.athletes.reduce((n,a)=>n+Array.from({length:12},(_,i)=>db.payments.find(x=>x.athleteId===a.id&&x.year===y&&x.month===i+1)?.paid?1:0).reduce((a,b)=>a+b,0),0);
+ printShell(`Informe de mensualidades · ${y}`,`Estado de pagos por deportista · PAGÓ / DEBE`,`<table><thead>${head}</thead><tbody>${rows}</tbody></table><p><b>Resumen:</b> ${paid} mensualidades pagadas de ${total} registradas en la matriz.</p>`);
+}
+
+function club(){
+ document.getElementById('app').innerHTML=header('Club y logo','Personaliza la identidad que aparecerá dentro de la aplicación')+
+ `<div class="card" style="margin-bottom:14px"><h3>Nombre de la aplicación</h3><div class="field"><label>Nombre que aparecerá donde dice ClubGestor V2</label><input id="appName" value="${esc(db.appName)}" placeholder="Ej. Mi Club, SportManager, Club Tebaida"></div><button class="primary" onclick="saveAppName()">Guardar nombre de la aplicación</button></div>
+ <div class="grid2"><div class="card"><h3>Información del club</h3><div class="field"><label>Nombre del club</label><input id="clubName" value="${esc(db.club.name)}"></div><button class="primary" onclick="saveClubName()">Guardar nombre</button></div>
+ <div class="card"><h3>Logo del club</h3><div class="logoBox">${db.club.logo?`<img class="logoPreview" src="${db.club.logo}" alt="Logo actual">`:`<div class="logoPreview" style="display:grid;place-items:center;font-size:28px">🏆</div>`}<div><input id="clubLogo" type="file" accept="image/*"><p class="muted">PNG o JPG. Recomendado: imagen cuadrada.</p><button class="primary" onclick="saveLogo()">Guardar logo</button></div></div></div>
+ <div style="height:14px"></div><div class="card"><h3>Vista</h3><div class="clubHero">${db.club.logo?`<img src="${db.club.logo}" alt="Logo">`:'<div style="font-size:45px">🏆</div>'}<div><b>${esc(db.club.name)}</b><p class="muted">Este logo se mostrará en la aplicación.</p></div></div></div>`;
+}
+function saveAppName(){db.appName=document.getElementById('appName').value.trim()||'ClubGestor V2';save();syncAppName();render()}
+function saveClubName(){db.club.name=document.getElementById('clubName').value.trim()||'Mi Club Deportivo';save();render()}
+function saveLogo(){const f=document.getElementById('clubLogo').files[0];if(!f)return alert('Seleccione una imagen.');if(f.size>1500000)return alert('El logo debe pesar menos de 1.5 MB.');const r=new FileReader();r.onload=()=>{db.club.logo=r.result;save();render()};r.readAsDataURL(f)}
+
+syncAppName();
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
