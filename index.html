@@ -594,6 +594,11 @@ m=>({
 
 function openModal(title,body,saveFn){
 
+const modal=document.getElementById('modal');
+const modalTitle=document.getElementById('modalTitle');
+const modalBody=document.getElementById('modalBody');
+const modalSave=document.getElementById('modalSave');
+
 modalTitle.textContent=title;
 modalBody.innerHTML=body;
 modalSave.onclick=saveFn;
@@ -603,7 +608,10 @@ modal.classList.add('open');
 
 
 function closeModal(){
-modal.classList.remove('open')
+
+document.getElementById('modal')
+.classList.remove('open');
+
 }
 
 
