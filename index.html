@@ -85,14 +85,14 @@ function home(){
 }
 
 function athletes(){
- document.getElementById('app').innerHTML=header('Deportistas','Registro completo de los integrantes del club',`<button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`) +
- `<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><div class="right"><span class="muted">${db.athletes.length} deportistas</span></div></div>
- <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th></th></tr></thead><tbody id="athBody"></tbody></table></div>`;
+ document.getElementById('app').innerHTML=header('Deportistas','Base de datos completa de los integrantes del club',`<button onclick="printAthletesPDF()">📄 PDF base de datos</button><button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`) +
+ `<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><div class="right"><span class="muted">${db.athletes.length} deportistas · El PDF incluye todos los datos registrados</span></div></div>
+ <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
  renderAthletes();
 }
 function renderAthletes(){
  const q=(document.getElementById('athSearch')?.value||'').toLowerCase(),body=document.getElementById('athBody');if(!body)return;
- body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport).toLowerCase().includes(q)).map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth)}</td><td>${esc(a.weight)} kg</td><td>${esc(a.height)} cm</td><td>${esc(a.sport)}</td><td>${esc(a.category)}</td><td>${esc(a.phone)}</td><td><div style="display:flex;gap:5px"><button onclick="editAthlete('${a.id}')">Editar</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`).join('')||'<tr><td colspan=9 class="empty">No hay deportistas registrados.</td></tr>';
+ body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport+' '+a.category).toLowerCase().includes(q)).map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth)}</td><td>${esc(a.weight)} kg</td><td>${esc(a.height)} cm</td><td>${esc(a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport)}</td><td>${esc(a.category)}</td><td>${esc(a.phone)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button onclick="editAthlete('${a.id}')">Editar</button><button onclick="printAthletePDF('${a.id}')">📄 PDF</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`).join('')||'<tr><td colspan=9 class="empty">No hay deportistas registrados.</td></tr>';
 }
 document.addEventListener('input',e=>{if(e.target.id==='athSearch')renderAthletes()});
 function openAthlete(existing=null){
@@ -203,6 +203,31 @@ function printShell(title,subtitle,bodyHtml){
  window.print();
  setTimeout(()=>report.remove(),500);
 }
+function athletePdfData(a){
+ const sport=a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport;
+ return [
+  ['Nombre completo',a.name],['Tipo de documento',a.docType],['Número de documento',a.document],
+  ['Fecha de nacimiento',a.birth],['Peso',a.weight?`${a.weight} kg`:'' ],['Talla',a.height?`${a.height} cm`:'' ],
+  ['Deporte',sport],['Categoría',a.category],['Dirección',a.address],['Celular',a.phone],['EPS',a.eps]
+ ];
+}
+function printAthletePDF(id){
+ const a=db.athletes.find(x=>x.id===id);
+ if(!a)return alert('No se encontró el deportista.');
+ const data=athletePdfData(a);
+ const rows=data.map(([k,v])=>`<tr><th style="width:28%;text-align:left">${esc(k)}</th><td style="text-align:left">${esc(v||'—')}</td></tr>`).join('');
+ printShell(`Ficha del deportista · ${a.name}`,`Registro individual · ${esc(a.docType||'Documento')} ${esc(a.document||'')}`,`<div style="max-width:780px"><table><tbody>${rows}</tbody></table><h3 style="margin-top:18px">Observación</h3><p>Esta ficha contiene los datos registrados en la base de datos local de ClubGestor al momento de generar el documento.</p></div>`);
+}
+function printAthletesPDF(){
+ if(!db.athletes.length)return alert('No hay deportistas registrados para generar el PDF.');
+ const rows=db.athletes.map((a,i)=>{
+  const sport=a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport;
+  return `<tr><td>${i+1}</td><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth||'')}</td><td>${esc(a.weight||'')} kg</td><td>${esc(a.height||'')} cm</td><td>${esc(sport||'')}</td><td>${esc(a.category||'')}</td><td>${esc(a.address||'')}</td><td>${esc(a.phone||'')}</td><td>${esc(a.eps||'')}</td></tr>`;
+ }).join('');
+ const head='<tr><th>#</th><th>Nombre completo</th><th>Documento</th><th>F. nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th></tr>';
+ printShell('Base de datos de deportistas',`Listado completo · ${db.athletes.length} deportista${db.athletes.length===1?'':'s'}`,`<table><thead>${head}</thead><tbody>${rows}</tbody></table><p><b>Total de deportistas:</b> ${db.athletes.length}</p>`);
+}
+
 function printAttendancePDF(){
  const y=Number(document.getElementById('attYear')?.value)||new Date().getFullYear();
  const m=Number(document.getElementById('attMonth')?.value)||new Date().getMonth()+1;
@@ -244,6 +269,9 @@ function club(){
 function saveAppName(){db.appName=document.getElementById('appName').value.trim()||'ClubGestor V2';save();syncAppName();render()}
 function saveClubName(){db.club.name=document.getElementById('clubName').value.trim()||'Mi Club Deportivo';save();render()}
 function saveLogo(){const f=document.getElementById('clubLogo').files[0];if(!f)return alert('Seleccione una imagen.');if(f.size>1500000)return alert('El logo debe pesar menos de 1.5 MB.');const r=new FileReader();r.onload=()=>{db.club.logo=r.result;save();render()};r.readAsDataURL(f)}
+
+window.printAthletesPDF=printAthletesPDF;
+window.printAthletePDF=printAthletePDF;
 
 syncAppName();
 render();
