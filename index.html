@@ -18,7 +18,7 @@
 button{border:1px solid var(--line);background:#fff;color:var(--text);padding:9px 13px;border-radius:8px;cursor:pointer}button.primary{background:var(--p);color:#fff;border-color:var(--p)}button.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px;box-shadow:0 2px 7px #10251a0b}.num{font-size:29px;font-weight:800}.label{font-size:12px;color:var(--muted)}.kpi{min-height:105px}.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:14px 0}.left,.right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;background:#fff;font:inherit}textarea{width:100%;min-height:80px;padding:10px;border:1px solid #cfd8d1;border-radius:8px;font:inherit}.field{margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.span2{grid-column:span 2}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}table{border-collapse:collapse;width:100%;min-width:850px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{font-size:11px;text-transform:uppercase;background:#f7faf8;color:#526158}tr:hover td{background:#fbfdfb}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}table{border-collapse:collapse;width:100%;min-width:1500px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{font-size:11px;text-transform:uppercase;background:#f7faf8;color:#526158}tr:hover td{background:#fbfdfb}
 .pill{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700}.green{background:var(--okbg);color:var(--p)}.red{background:#fee2e2;color:var(--danger)}.yellow{background:var(--warnbg);color:#92400e}.muted{color:var(--muted)}.empty{text-align:center;padding:35px;color:var(--muted)}
 .modal{position:fixed;inset:0;background:#10251a99;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:#fff;border-radius:14px;padding:20px;width:min(820px,100%);max-height:92vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0 0 16px}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
 .logoBox{display:flex;align-items:center;gap:15px}.logoPreview{width:80px;height:80px;object-fit:contain;border:1px dashed #aab6ad;border-radius:12px;background:#fafcfb}.clubHero{display:flex;align-items:center;gap:15px}.clubHero img{width:70px;height:70px;object-fit:contain;border-radius:12px}
@@ -133,15 +133,34 @@ function printShell(title,subtitle,body){
 function athletes(){
  document.getElementById('app').innerHTML=header('Deportistas','Base de datos completa de los integrantes del club',`<button onclick="printAllAthletesPDF()">📄 PDF base de datos</button><button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`)
  +`<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><span class="muted">${db.athletes.length} deportistas</span></div>
- <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
+ <div class="tablewrap"><table><thead><tr><th>Nombre completo</th><th>Tipo documento</th><th>Número documento</th><th>Nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
  renderAthletes();
 }
 function renderAthletes(){
  const q=(document.getElementById('athSearch')?.value||'').toLowerCase(),body=document.getElementById('athBody');if(!body)return;
  body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport+' '+(a.otherSport||'')).toLowerCase().includes(q)).map(a=>{
   const ac=ageCategory(a);
-  return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth||'')}</td><td>${ac.age??'—'}</td><td>${esc(a.weight||'')} kg</td><td>${esc(a.height||'')} cm</td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td><td><span class="pill green">${esc(ac.category)}</span></td><td>${esc(a.phone||'')}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button onclick="editAthlete('${a.id}')">Editar</button><button onclick="printAthletePDF('${a.id}')">PDF</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`
- }).join('')||'<tr><td colspan="10" class="empty">No hay deportistas registrados.</td></tr>';
+  return `<tr>
+<td><b>${esc(a.name)}</b></td>
+<td>${esc(a.docType||'')}</td>
+<td>${esc(a.document||'')}</td>
+<td>${esc(a.birth||'')}</td>
+<td>${ac.age??'—'}</td>
+<td>${esc(a.weight||'')} kg</td>
+<td>${esc(a.height||'')} cm</td>
+<td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td>
+<td><span class="pill green">${esc(ac.category)}</span></td>
+<td>${esc(a.address||'')}</td>
+<td>${esc(a.phone||'')}</td>
+<td>${esc(a.eps||'')}</td>
+<td><div style="display:flex;gap:5px;flex-wrap:wrap">
+<button onclick="viewAthlete('${a.id}')">👁️ Ver</button>
+<button onclick="editAthlete('${a.id}')">Editar</button>
+<button onclick="printAthletePDF('${a.id}')">PDF</button>
+<button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button>
+</div></td>
+</tr>`
+ }).join('')||'<tr><td colspan="13" class="empty">No hay deportistas registrados.</td></tr>';
 }
 document.addEventListener('input',e=>{if(e.target.id==='athSearch')renderAthletes()});
 
@@ -173,6 +192,36 @@ function openAthlete(existing=null){
  document.getElementById('aSport').value=a.sport||'Fútbol';
 }
 function previewAgeCategory(){const age=ageFromBirth(document.getElementById('aBirth').value),cat=categoryFromAge(age);document.getElementById('aAge').value=age??'';document.getElementById('aCat').value=cat;document.getElementById('agePreview').textContent=(age??'—')+' años';document.getElementById('catPreview').textContent=cat}
+
+function viewAthlete(id){
+ const a=db.athletes.find(x=>x.id===id);
+ if(!a)return;
+ const ac=ageCategory(a);
+ openModal(
+  'Ficha completa del deportista',
+  `<div class="card" style="margin-bottom:12px">
+    <h3 style="margin-top:0">${esc(a.name)}</h3>
+    <div class="muted">${esc(ac.category)} · ${ac.age??'—'} años</div>
+  </div>
+  <div class="formgrid">
+    <div class="field"><label>Nombre completo</label><input value="${esc(a.name)}" readonly></div>
+    <div class="field"><label>Tipo de documento</label><input value="${esc(a.docType||'')}" readonly></div>
+    <div class="field"><label>Número de documento</label><input value="${esc(a.document||'')}" readonly></div>
+    <div class="field"><label>Fecha de nacimiento</label><input value="${esc(a.birth||'')}" readonly></div>
+    <div class="field"><label>Edad</label><input value="${ac.age??'—'} años" readonly></div>
+    <div class="field"><label>Categoría automática</label><input value="${esc(ac.category)}" readonly></div>
+    <div class="field"><label>Peso</label><input value="${esc(a.weight||'')} kg" readonly></div>
+    <div class="field"><label>Talla</label><input value="${esc(a.height||'')} cm" readonly></div>
+    <div class="field"><label>Deporte</label><input value="${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}" readonly></div>
+    <div class="field"><label>Celular</label><input value="${esc(a.phone||'')}" readonly></div>
+    <div class="field span2"><label>Dirección</label><input value="${esc(a.address||'')}" readonly></div>
+    <div class="field span2"><label>EPS</label><input value="${esc(a.eps||'')}" readonly></div>
+  </div>`,
+  ()=>closeModal()
+ );
+ document.getElementById('modalSave').textContent='Cerrar';
+}
+
 function editAthlete(id){openAthlete(db.athletes.find(a=>a.id===id))}
 function deleteAthlete(id){const a=db.athletes.find(x=>x.id===id);if(!a)return;if(!confirm(`¿Eliminar a ${a.name}? También se eliminarán sus asistencias y mensualidades.`))return;db.athletes=db.athletes.filter(x=>x.id!==id);db.attendance=db.attendance.filter(x=>x.athleteId!==id);db.payments=db.payments.filter(x=>x.athleteId!==id);save();render()}
 
