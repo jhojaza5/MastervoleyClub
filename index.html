@@ -178,7 +178,7 @@ function openAttendance(){
 function payments(){
  const y=new Date().getFullYear(),m=new Date().getMonth()+1;
  document.getElementById('app').innerHTML=header('Mensualidades','Control mensual de pagos por deportista',`<button onclick="printPaymentsPDF()">🖨️ Imprimir / PDF</button><button class="primary" onclick="openPayment()">+ Registrar pago</button>`) +
- `<div class="card"><div class="toolbar"><div class="left"><select id="payYear" style="width:110px">${[y-1,y,y+1].map(v=>`<option ${v===y?'selected':''}>${v}</option>`).join('')}</select><input id="paySearch" placeholder="Buscar deportista..." style="width:260px"></div><span class="muted">Pulsa PAGÓ / DEBE para cambiar el estado.</span></div>
+ `<div class="card"><div class="toolbar"><div class="left"><input id="payYear" type="number" min="1900" max="9999" step="1" value="${y}" style="width:110px"><input id="paySearch" placeholder="Buscar deportista..." style="width:260px"></div><span class="muted">Pulsa PAGÓ / DEBE para cambiar el estado.</span></div>
  <div class="tablewrap"><table><thead><tr><th>Deportista</th><th>Deporte</th>${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody id="payBody"></tbody></table></div></div>`;
  renderPayments();
 }
