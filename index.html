@@ -84,15 +84,53 @@ function home(){
  <div class="card"><h3>Estado del club</h3><p class="muted">Puedes cambiar el nombre y cargar el logo desde <b>Club y logo</b>.</p><button onclick="page='club';render()">Configurar club</button></div></div>`;
 }
 
+function calculateAge(birth){
+ const b=new Date(birth+'T00:00:00');
+ if(!birth || Number.isNaN(b.getTime())) return '';
+ const today=new Date();
+ let age=today.getFullYear()-b.getFullYear();
+ const beforeBirthday=(today.getMonth()<b.getMonth()) || (today.getMonth()===b.getMonth() && today.getDate()<b.getDate());
+ if(beforeBirthday) age--;
+ return age>=0?age:'';
+}
+function categoryFromAge(age){
+ age=Number(age);
+ if(!Number.isFinite(age)) return '';
+ if(age<7) return 'Fuera de categoría';
+ if(age<=9) return 'Benjamín';
+ if(age<=12) return 'Mini-Vóley (U13)';
+ if(age<=14) return 'Infantil (U15)';
+ if(age<=16) return 'Prejuvenil (U17)';
+ if(age<=18) return 'Juvenil (U19/U21)';
+ if(age<30) return 'Mayores / Mayores Libre';
+ if(age<40) return 'Máster +30';
+ if(age<50) return 'Máster +40';
+ return 'Máster +50';
+}
+function athleteAgeCategory(a){
+ const age=calculateAge(a?.birth);
+ return {age,category:categoryFromAge(age)};
+}
+function refreshAthleteAgeCategory(){
+ const birth=document.getElementById('aBirth');
+ const ageEl=document.getElementById('aAge');
+ const catEl=document.getElementById('aCat');
+ if(!birth||!ageEl||!catEl)return;
+ const age=calculateAge(birth.value);
+ ageEl.value=age=== ''?'':age;
+ catEl.value=categoryFromAge(age);
+}
+
 function athletes(){
  document.getElementById('app').innerHTML=header('Deportistas','Base de datos completa de los integrantes del club',`<button onclick="printAthletesPDF()">📄 PDF base de datos</button><button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`) +
- `<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><div class="right"><span class="muted">${db.athletes.length} deportistas · El PDF incluye todos los datos registrados</span></div></div>
- <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
+ `<div class="card" style="margin-bottom:14px"><b>Clasificación automática:</b> la edad se calcula con la fecha de nacimiento y la categoría se asigna automáticamente. A los 14 años se mantiene <b>Infantil (U15)</b>, de 15 a 16 <b>Prejuvenil (U17)</b> y de 17 a 18 <b>Juvenil (U19/U21)</b>; desde los 30 años pasa a Máster (+30, +40 o +50).</div>
+ <div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><div class="right"><span class="muted">${db.athletes.length} deportistas · El PDF incluye todos los datos registrados</span></div></div>
+ <div class="tablewrap"><table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Celular</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
  renderAthletes();
 }
 function renderAthletes(){
  const q=(document.getElementById('athSearch')?.value||'').toLowerCase(),body=document.getElementById('athBody');if(!body)return;
- body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport+' '+a.category).toLowerCase().includes(q)).map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth)}</td><td>${esc(a.weight)} kg</td><td>${esc(a.height)} cm</td><td>${esc(a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport)}</td><td>${esc(a.category)}</td><td>${esc(a.phone)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button onclick="editAthlete('${a.id}')">Editar</button><button onclick="printAthletePDF('${a.id}')">📄 PDF</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`).join('')||'<tr><td colspan=9 class="empty">No hay deportistas registrados.</td></tr>';
+ body.innerHTML=db.athletes.filter(a=>(a.name+' '+a.document+' '+a.sport+' '+(athleteAgeCategory(a).category||'')).toLowerCase().includes(q)).map(a=>{const ac=athleteAgeCategory(a);return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth)}</td><td>${esc(ac.age)}</td><td>${esc(a.weight)} kg</td><td>${esc(a.height)} cm</td><td>${esc(a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport)}</td><td>${esc(ac.category)}</td><td>${esc(a.phone)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button onclick="editAthlete('${a.id}')">Editar</button><button onclick="printAthletePDF('${a.id}')">📄 PDF</button><button class="danger" onclick="deleteAthlete('${a.id}')">Eliminar</button></div></td></tr>`}).join('')||'<tr><td colspan=10 class="empty">No hay deportistas registrados.</td></tr>';
 }
 document.addEventListener('input',e=>{if(e.target.id==='athSearch')renderAthletes()});
 function openAthlete(existing=null){
@@ -102,21 +140,25 @@ function openAthlete(existing=null){
  <div class="field"><label>Tipo de documento *</label><select id="aDocType"><option ${a.docType==='Cédula'?'selected':''}>Cédula</option><option ${a.docType==='Tarjeta de identidad'?'selected':''}>Tarjeta de identidad</option><option>Pasaporte</option><option>Otro</option></select></div>
  <div class="field"><label>Número *</label><input id="aDoc" value="${esc(a.document)}"></div>
  <div class="field"><label>Fecha de nacimiento</label><input id="aBirth" type="date" value="${esc(a.birth)}"></div>
+ <div class="field"><label>Edad</label><input id="aAge" type="number" readonly placeholder="Automática"></div>
  <div class="field"><label>Peso (kg)</label><input id="aWeight" type="number" min="0" step=".1" value="${esc(a.weight)}"></div>
  <div class="field"><label>Talla (cm)</label><input id="aHeight" type="number" min="0" step=".1" value="${esc(a.height)}"></div>
  <div class="field"><label>Deporte</label><select id="aSport"><option>Fútbol</option><option>Baloncesto</option><option>Voleibol</option><option>Bádminton</option><option>Atletismo</option><option>Natación</option><option>Ciclismo</option><option>Otro deporte</option></select></div>
  <div class="field"><label>Si es otro deporte, indique cuál</label><input id="aOtherSport" value="${esc(a.otherSport||'')}"></div>
- <div class="field"><label>Categoría</label><input id="aCat" value="${esc(a.category)}" placeholder="Ej. Sub-15, Sub-17, Mayores"></div>
+ <div class="field"><label>Categoría automática</label><input id="aCat" value="${esc(a.category)}" readonly placeholder="Se asigna según la edad"></div>
  <div class="field span2"><label>Dirección</label><input id="aAddress" value="${esc(a.address)}"></div>
  <div class="field"><label>Celular</label><input id="aPhone" value="${esc(a.phone)}"></div>
  <div class="field"><label>EPS</label><input id="aEps" value="${esc(a.eps)}"></div>
  </div>`,()=>{
- const x={...a,id:a.id||uid('ath'),name:document.getElementById('aName').value.trim(),docType:document.getElementById('aDocType').value,document:document.getElementById('aDoc').value.trim(),birth:document.getElementById('aBirth').value,weight:document.getElementById('aWeight').value,height:document.getElementById('aHeight').value,sport:document.getElementById('aSport').value,otherSport:document.getElementById('aOtherSport').value.trim(),category:document.getElementById('aCat').value.trim(),address:document.getElementById('aAddress').value.trim(),phone:document.getElementById('aPhone').value.trim(),eps:document.getElementById('aEps').value.trim()};
+ const x={...a,id:a.id||uid('ath'),name:document.getElementById('aName').value.trim(),docType:document.getElementById('aDocType').value,document:document.getElementById('aDoc').value.trim(),birth:document.getElementById('aBirth').value,weight:document.getElementById('aWeight').value,height:document.getElementById('aHeight').value,sport:document.getElementById('aSport').value,otherSport:document.getElementById('aOtherSport').value.trim(),category:categoryFromAge(calculateAge(document.getElementById('aBirth').value)),address:document.getElementById('aAddress').value.trim(),phone:document.getElementById('aPhone').value.trim(),eps:document.getElementById('aEps').value.trim()};
  if(!x.name||!x.document)return alert('Nombre y número de documento son obligatorios.');
  if(x.sport==='Otro deporte'&&!x.otherSport)return alert('Indique cuál es el otro deporte.');
  if(existing)db.athletes=db.athletes.map(z=>z.id===a.id?x:z);else db.athletes.push(x);save();closeModal();render();
  });
  document.getElementById('aSport').value=a.sport||'Fútbol';
+ refreshAthleteAgeCategory();
+ document.getElementById('aBirth').addEventListener('input',refreshAthleteAgeCategory);
+ document.getElementById('aBirth').addEventListener('change',refreshAthleteAgeCategory);
 }
 function editAthlete(id){openAthlete(db.athletes.find(a=>a.id===id))}
 function deleteAthlete(id){
@@ -205,10 +247,11 @@ function printShell(title,subtitle,bodyHtml){
 }
 function athletePdfData(a){
  const sport=a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport;
+ const ac=athleteAgeCategory(a);
  return [
   ['Nombre completo',a.name],['Tipo de documento',a.docType],['Número de documento',a.document],
-  ['Fecha de nacimiento',a.birth],['Peso',a.weight?`${a.weight} kg`:'' ],['Talla',a.height?`${a.height} cm`:'' ],
-  ['Deporte',sport],['Categoría',a.category],['Dirección',a.address],['Celular',a.phone],['EPS',a.eps]
+  ['Fecha de nacimiento',a.birth],['Edad',ac.age?`${ac.age} años`:'' ],['Peso',a.weight?`${a.weight} kg`:'' ],['Talla',a.height?`${a.height} cm`:'' ],
+  ['Deporte',sport],['Categoría',ac.category],['Dirección',a.address],['Celular',a.phone],['EPS',a.eps]
  ];
 }
 function printAthletePDF(id){
@@ -222,9 +265,10 @@ function printAthletesPDF(){
  if(!db.athletes.length)return alert('No hay deportistas registrados para generar el PDF.');
  const rows=db.athletes.map((a,i)=>{
   const sport=a.sport==='Otro deporte'&&a.otherSport?a.otherSport:a.sport;
-  return `<tr><td>${i+1}</td><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth||'')}</td><td>${esc(a.weight||'')} kg</td><td>${esc(a.height||'')} cm</td><td>${esc(sport||'')}</td><td>${esc(a.category||'')}</td><td>${esc(a.address||'')}</td><td>${esc(a.phone||'')}</td><td>${esc(a.eps||'')}</td></tr>`;
+  const ac=athleteAgeCategory(a);
+  return `<tr><td>${i+1}</td><td><b>${esc(a.name)}</b></td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth||'')}</td><td>${esc(ac.age)}</td><td>${esc(a.weight||'')} kg</td><td>${esc(a.height||'')} cm</td><td>${esc(sport||'')}</td><td>${esc(ac.category||'')}</td><td>${esc(a.address||'')}</td><td>${esc(a.phone||'')}</td><td>${esc(a.eps||'')}</td></tr>`;
  }).join('');
- const head='<tr><th>#</th><th>Nombre completo</th><th>Documento</th><th>F. nacimiento</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th></tr>';
+ const head='<tr><th>#</th><th>Nombre completo</th><th>Documento</th><th>F. nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th></tr>';
  printShell('Base de datos de deportistas',`Listado completo · ${db.athletes.length} deportista${db.athletes.length===1?'':'s'}`,`<table><thead>${head}</thead><tbody>${rows}</tbody></table><p><b>Total de deportistas:</b> ${db.athletes.length}</p>`);
 }
 
