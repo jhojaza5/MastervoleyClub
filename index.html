@@ -23,7 +23,7 @@ input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;
 .modal{position:fixed;inset:0;background:#10251a99;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:#fff;border-radius:14px;padding:20px;width:min(820px,100%);max-height:92vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0 0 16px}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
 .logoBox{display:flex;align-items:center;gap:15px}.logoPreview{width:80px;height:80px;object-fit:contain;border:1px dashed #aab6ad;border-radius:12px;background:#fafcfb}.clubHero{display:flex;align-items:center;gap:15px}.clubHero img{width:70px;height:70px;object-fit:contain;border-radius:12px}
 .attMatrix th,.attMatrix td{text-align:center;white-space:nowrap;padding:7px 5px}.attMatrix th:first-child,.attMatrix td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:2}.attDay{min-width:48px;line-height:1.15}.attDay small{display:block;font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase}.attDay.sunday{background:#fef2f2;color:#991b1b}.attDay.saturday{background:#fff7ed;color:#9a3412}.attCell{width:34px;height:32px;padding:0;border-radius:7px;font-size:11px;font-weight:800}.attP{background:#dcfce7;color:#166534;border-color:#bbf7d0}.attA{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.attE{background:#fef3c7;color:#92400e;border-color:#fde68a}.attR{background:#ffedd5;color:#9a3412;border-color:#fed7aa}.attEmpty{background:#f3f4f6;color:#6b7280;border-color:#e5e7eb}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:10px}
-.printOnly{display:none}.printReport{font-family:Arial,sans-serif;color:#111}.printHeader{display:flex;align-items:center;gap:14px;border-bottom:2px solid #166534;padding-bottom:10px;margin-bottom:14px}.printHeader img{width:70px;height:70px;object-fit:contain}.printReport h1{margin:0;font-size:22px}.printReport h2{margin:4px 0 2px;font-size:17px}.printMeta,.printFoot{font-size:10px;color:#555}.printReport table{min-width:0;width:100%;border-collapse:collapse}.printReport th,.printReport td{border:1px solid #bbb;padding:5px 4px;font-size:8.5px;text-align:center}.printReport th{background:#eee}.printReport td:first-child,.printReport th:first-child{text-align:left}
+.printOnly{display:none}.printReport{font-family:Arial,sans-serif;color:#111}.printHeader{display:flex;align-items:center;gap:14px;border-bottom:2px solid #166534;padding-bottom:10px;margin-bottom:14px}.printHeader img{width:70px;height:70px;object-fit:contain}.printReport h1{margin:0;font-size:22px}.printReport h2{margin:4px 0 2px;font-size:17px}.printMeta,.printFoot{font-size:10px;color:#555}.printReport table{min-width:0;width:100%;border-collapse:collapse;table-layout:auto}.printReport th,.printReport td{border:1px solid #bbb;padding:5px 4px;font-size:8.5px;text-align:center}.printReport th{background:#eee}.printReport td:first-child,.printReport th:first-child{text-align:left}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}}@media(max-width:650px){.app{display:block}.sidebar{position:static;width:100%}.main{margin:0;width:100%;padding:14px}.grid,.grid2,.formgrid{grid-template-columns:1fr}.span2{grid-column:auto}.top{display:block}.actions{margin-top:10px}.nav{display:grid;grid-template-columns:1fr 1fr}}
 @media print{body{background:#fff!important}.app,.modal{display:none!important}.printOnly{display:block!important}.printReport{width:100%;padding:0;margin:0}.printReport table{page-break-inside:auto}.printReport tr{page-break-inside:avoid}.printReport thead{display:table-header-group}@page{size:A4 landscape;margin:8mm}}
 </style>
@@ -108,21 +108,76 @@ function home(){
 
 function athletePdfData(a){
  const ac=ageCategory(a);
- return `<div class="printHeader">${db.club.logo?`<img src="${db.club.logo}">`:''}<div><h1>${esc(db.club.name)}</h1><h2>Ficha del deportista</h2><div class="printMeta">Generado desde ${esc(db.appName)}</div></div></div>
- <table><tbody>
- <tr><th>Nombre completo</th><td>${esc(a.name)}</td><th>Edad</th><td>${ac.age??'—'} años</td></tr>
- <tr><th>Documento</th><td>${esc(a.docType)} ${esc(a.document)}</td><th>Categoría automática</th><td>${esc(ac.category)}</td></tr>
- <tr><th>Fecha de nacimiento</th><td>${esc(a.birth||'—')}</td><th>Deporte</th><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td></tr>
- <tr><th>Peso</th><td>${esc(a.weight||'—')} kg</td><th>Talla</th><td>${esc(a.height||'—')} cm</td></tr>
- <tr><th>Dirección</th><td>${esc(a.address||'—')}</td><th>Celular</th><td>${esc(a.phone||'—')}</td></tr>
+ const sport=(a.sport==='Otro deporte'?(a.otherSport||'Otro deporte'):a.sport);
+ return `
+ <div class="printHeader">
+ ${db.club.logo?`<img src="${db.club.logo}">`:''}
+ <div>
+   <h1>${esc(db.club.name||'Mi Club Deportivo')}</h1>
+   <h2>Ficha completa del deportista</h2>
+   <div class="printMeta">Generado desde ${esc(db.appName)}</div>
+ </div>
+ </div>
+
+ <table>
+ <tbody>
+ <tr><th>Nombre completo</th><td>${esc(a.name||'—')}</td><th>Edad</th><td>${ac.age??'—'} años</td></tr>
+ <tr><th>Tipo de documento</th><td>${esc(a.docType||'—')}</td><th>Número de documento</th><td>${esc(a.document||'—')}</td></tr>
+ <tr><th>Fecha de nacimiento</th><td>${esc(a.birth||'—')}</td><th>Categoría automática</th><td>${esc(ac.category)}</td></tr>
+ <tr><th>Deporte</th><td>${esc(sport)}</td><th>Peso</th><td>${esc(a.weight||'—')} kg</td></tr>
+ <tr><th>Talla</th><td>${esc(a.height||'—')} cm</td><th>Celular</th><td>${esc(a.phone||'—')}</td></tr>
+ <tr><th>Dirección</th><td colspan="3">${esc(a.address||'—')}</td></tr>
  <tr><th>EPS</th><td colspan="3">${esc(a.eps||'—')}</td></tr>
- </tbody></table>`;
+ </tbody>
+ </table>`;
 }
+
 function printAthletePDF(id){const a=db.athletes.find(x=>x.id===id);if(!a)return;printShell('Ficha individual',`Deportista: ${a.name}`,athletePdfData(a))}
 function printAllAthletesPDF(){
- const rows=db.athletes.map(a=>{const ac=ageCategory(a);return `<tr><td>${esc(a.name)}</td><td>${esc(a.docType)} ${esc(a.document)}</td><td>${esc(a.birth||'')}</td><td>${ac.age??'—'}</td><td>${esc(ac.category)}</td><td>${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}</td><td>${esc(a.phone||'')}</td><td>${esc(a.eps||'')}</td></tr>`}).join('')||'<tr><td colspan="8">No hay deportistas registrados.</td></tr>';
- printShell('Base de datos de deportistas',`${db.athletes.length} deportistas registrados`,`<table><thead><tr><th>Nombre</th><th>Documento</th><th>Nacimiento</th><th>Edad</th><th>Categoría</th><th>Deporte</th><th>Celular</th><th>EPS</th></tr></thead><tbody>${rows}</tbody></table>`)
+ const rows=db.athletes.map(a=>{
+   const ac=ageCategory(a);
+   const sport=(a.sport==='Otro deporte'?(a.otherSport||'Otro deporte'):a.sport);
+   return `<tr>
+     <td>${esc(a.name||'')}</td>
+     <td>${esc(a.docType||'')}</td>
+     <td>${esc(a.document||'')}</td>
+     <td>${esc(a.birth||'')}</td>
+     <td>${ac.age??'—'}</td>
+     <td>${esc(ac.category)}</td>
+     <td>${esc(a.weight||'')} kg</td>
+     <td>${esc(a.height||'')} cm</td>
+     <td>${esc(sport)}</td>
+     <td>${esc(a.address||'')}</td>
+     <td>${esc(a.phone||'')}</td>
+     <td>${esc(a.eps||'')}</td>
+   </tr>`
+ }).join('')||'<tr><td colspan="12">No hay deportistas registrados.</td></tr>';
+
+ printShell(
+   'Base de datos completa de deportistas',
+   `${db.athletes.length} deportistas registrados`,
+   `<table>
+     <thead>
+       <tr>
+         <th>Nombre completo</th>
+         <th>Tipo documento</th>
+         <th>Número documento</th>
+         <th>Nacimiento</th>
+         <th>Edad</th>
+         <th>Categoría</th>
+         <th>Peso</th>
+         <th>Talla</th>
+         <th>Deporte</th>
+         <th>Dirección</th>
+         <th>Celular</th>
+         <th>EPS</th>
+       </tr>
+     </thead>
+     <tbody>${rows}</tbody>
+   </table>`
+ );
 }
+
 function printShell(title,subtitle,body){
  const old=document.getElementById('printReport');if(old)old.remove();
  const r=document.createElement('div');r.id='printReport';r.className='printOnly printReport';
