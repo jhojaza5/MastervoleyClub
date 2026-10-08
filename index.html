@@ -47,7 +47,7 @@ input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;
 
 @media print{body{background:#fff!important}.app,.modal{display:none!important}.printOnly{display:block!important}.printReport{width:100%;padding:0;margin:0}.printReport table{page-break-inside:auto}.printReport tr{page-break-inside:avoid}.printReport thead{display:table-header-group}@page{size:A4 landscape;margin:8mm}}
 
-.athletePhotoBox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fafcfb}.athletePhotoPreview{width:110px;height:135px;object-fit:cover;border-radius:10px;border:1px solid #d8e0da;background:#eef3ef;display:block}.athletePhotoPlaceholder{width:110px;height:135px;border-radius:10px;border:1px dashed #b9c5bd;background:#f3f6f4;display:grid;place-items:center;text-align:center;color:#68756d;font-size:12px;padding:8px}.photoButtons{display:flex;gap:8px;flex-wrap:wrap}.athleteViewPhoto{width:150px;height:185px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}.athleteViewTop{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.pdfAthletePhoto{width:105px;height:135px;object-fit:cover;border:1px solid #999;border-radius:5px}.pdfAthletePhotoWrap{display:flex;justify-content:flex-end;margin:8px 0 14px}.</style>
+.athletePhotoBox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fafcfb}.athletePhotoPreview{width:110px;height:135px;object-fit:cover;border-radius:10px;border:1px solid #d8e0da;background:#eef3ef;display:block}.athletePhotoPlaceholder{width:110px;height:135px;border-radius:10px;border:1px dashed #b9c5bd;background:#f3f6f4;display:grid;place-items:center;text-align:center;color:#68756d;font-size:12px;padding:8px}.photoButtons{display:flex;gap:8px;flex-wrap:wrap}.photoAction{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid #cbd5ce;border-radius:8px;background:#fff;color:#24312a;font-weight:700;cursor:pointer;font-size:14px}.photoInput{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}.photoAction:active{transform:scale(.98)}.athleteViewPhoto{width:150px;height:185px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}.athleteViewTop{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.pdfAthletePhoto{width:105px;height:135px;object-fit:cover;border:1px solid #999;border-radius:5px}.pdfAthletePhotoWrap{display:flex;justify-content:flex-end;margin:8px 0 14px}.</style>
 </head>
 <body>
 <div class="app">
@@ -314,12 +314,12 @@ function openAthlete(existing=null){
      <b>Foto del deportista</b>
      <p class="muted" style="margin:4px 0 9px">La foto no aparece en la tabla. Solo se muestra en la ficha y en el PDF individual.</p>
      <div class="photoButtons">
-       <button type="button" onclick="document.getElementById('aPhotoFile').click()">📁 Subir foto</button>
-       <button type="button" onclick="document.getElementById('aPhotoCamera').click()">📷 Tomar foto</button>
+       <label class="photoAction" for="aPhotoFile">🖼️ Elegir foto</label>
+       <label class="photoAction" for="aPhotoCamera">📷 Tomar foto</label>
        <button type="button" onclick="removeAthletePhoto()">🗑️ Quitar</button>
      </div>
-     <input id="aPhotoFile" type="file" accept="image/*" style="display:none" onchange="handleAthletePhoto(this)">
-     <input id="aPhotoCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleAthletePhoto(this)">
+     <input id="aPhotoFile" class="photoInput" type="file" accept="image/*" onchange="handleAthletePhoto(this)">
+     <input id="aPhotoCamera" class="photoInput" type="file" accept="image/*" capture="environment" onchange="handleAthletePhoto(this)">
    </div>
  </div>
  <div class="card" style="margin-top:8px"><b>Clasificación:</b> <span id="catPreview">${esc(ac.category)}</span> · <span id="agePreview">${ac.age??'—'} años</span></div>`,
