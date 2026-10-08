@@ -206,11 +206,13 @@ function printShell(title,subtitle,body){
  document.body.appendChild(r);
  r.style.display='block';
 
- // En celular generamos un PDF real y lo abrimos en el visor del dispositivo.
- // Así se puede ampliar/reducir con el gesto de dos dedos.
- const pdfWindow=window.open('about:blank','_blank');
+ // Generamos un PDF real. En celulares NO lo cargamos en una pestaña blob:
+ // algunos visores móviles muestran esa pestaña en blanco. En su lugar
+ // descargamos el archivo PDF directamente para que el visor del teléfono
+ // lo abra desde Descargas y permita zoom con dos dedos.
+ const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.innerWidth<=768;
+ const pdfWindow=null;
  const fallbackPrint=()=>{
-   if(pdfWindow&&!pdfWindow.closed){try{pdfWindow.close()}catch(e){}}
    const app=document.querySelector('.app');
    const modal=document.getElementById('modal');
    const prevApp=app?app.style.display:'';
@@ -243,13 +245,18 @@ function printShell(title,subtitle,body){
  html2pdf().set(options).from(r).outputPdf('blob').then(blob=>{
    if(!blob)throw new Error('No se pudo generar el PDF');
    const url=URL.createObjectURL(blob);
-   if(pdfWindow&&!pdfWindow.closed){
-     pdfWindow.location.href=url;
-   }else{
-     const a=document.createElement('a');a.href=url;a.download=`${safeName}.pdf`;document.body.appendChild(a);a.click();a.remove();
+   const a=document.createElement('a');
+   a.href=url;
+   a.download=`${safeName}.pdf`;
+   a.rel='noopener';
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+   if(isMobile){
+     setTimeout(()=>alert('PDF descargado correctamente. Ábrelo desde la carpeta Descargas de tu celular para verlo y usar el zoom.'),350);
    }
    setTimeout(()=>{if(r.parentNode)r.remove();},1000);
-   setTimeout(()=>URL.revokeObjectURL(url),60000);
+   setTimeout(()=>URL.revokeObjectURL(url),120000);
  }).catch(err=>{
    console.error('Error generando PDF:',err);
    fallbackPrint();
