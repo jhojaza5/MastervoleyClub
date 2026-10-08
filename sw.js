@@ -1,4 +1,4 @@
-const CACHE = "clubgestor-local-v2";
+const CACHE = "clubgestor-v8";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
