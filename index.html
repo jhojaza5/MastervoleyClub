@@ -46,8 +46,8 @@ input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;
 }
 
 @media print{body{background:#fff!important}.app,.modal{display:none!important}.printOnly{display:block!important}.printReport{width:100%;padding:0;margin:0}.printReport table{page-break-inside:auto}.printReport tr{page-break-inside:avoid}.printReport thead{display:table-header-group}@page{size:A4 landscape;margin:8mm}}
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+.athletePhotoBox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fafcfb}.athletePhotoPreview{width:110px;height:135px;object-fit:cover;border-radius:10px;border:1px solid #d8e0da;background:#eef3ef;display:block}.athletePhotoPlaceholder{width:110px;height:135px;border-radius:10px;border:1px dashed #b9c5bd;background:#f3f6f4;display:grid;place-items:center;text-align:center;color:#68756d;font-size:12px;padding:8px}.photoButtons{display:flex;gap:8px;flex-wrap:wrap}.athleteViewPhoto{width:150px;height:185px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}.athleteViewTop{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.pdfAthletePhoto{width:105px;height:135px;object-fit:cover;border:1px solid #999;border-radius:5px}.pdfAthletePhotoWrap{display:flex;justify-content:flex-end;margin:8px 0 14px}.</style>
 </head>
 <body>
 <div class="app">
@@ -83,8 +83,48 @@ try{
   localStorage.setItem(KEY,JSON.stringify(db));
 }catch(e){db=clone(seed)}
 let page='home';
+let pendingAthletePhoto='';
+
 
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function prepareAthletePhoto(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){resolve('');return;}
+    if(!file.type.startsWith('image/')){reject(new Error('El archivo seleccionado no es una imagen.'));return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const maxW=700,maxH=900;
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+        const scale=Math.min(1,maxW/w,maxH/h);
+        w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.82));
+      };
+      img.onerror=()=>reject(new Error('No se pudo procesar la foto.'));
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('No se pudo leer la foto.'));
+    reader.readAsDataURL(file);
+  });
+}
+async function handleAthletePhoto(input){
+  const file=input?.files?.[0];if(!file)return;
+  try{
+    pendingAthletePhoto=await prepareAthletePhoto(file);
+    const box=document.getElementById('aPhotoPreview');
+    if(box)box.innerHTML=`<img class="athletePhotoPreview" src="${pendingAthletePhoto}" alt="Foto del deportista">`;
+  }catch(e){alert(e.message||'No fue posible cargar la foto.');}
+  input.value='';
+}
+function removeAthletePhoto(){
+  pendingAthletePhoto='';
+  const box=document.getElementById('aPhotoPreview');
+  if(box)box.innerHTML='<div class="athletePhotoPlaceholder">Sin foto</div>';
+}
+
 function uid(p){return p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openModal(title,body,fn){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modalSave').onclick=fn;document.getElementById('modal').classList.add('open')}
@@ -131,15 +171,7 @@ function athletePdfData(a){
  const ac=ageCategory(a);
  const sport=(a.sport==='Otro deporte'?(a.otherSport||'Otro deporte'):a.sport);
  return `
- <div class="printHeader">
- ${db.club.logo?`<img src="${db.club.logo}">`:''}
- <div>
-   <h1>${esc(db.club.name||'Mi Club Deportivo')}</h1>
-   <h2>Ficha completa del deportista</h2>
-   <div class="printMeta">Generado desde ${esc(db.appName)}</div>
- </div>
- </div>
-
+ ${a.photo?`<div class="pdfAthletePhotoWrap"><img class="pdfAthletePhoto" src="${a.photo}" alt="Foto del deportista"></div>`:''}
  <table>
  <tbody>
  <tr><th>Nombre completo</th><td>${esc(a.name||'—')}</td><th>Edad</th><td>${ac.age??'—'} años</td></tr>
@@ -204,57 +236,22 @@ function printShell(title,subtitle,body){
  const r=document.createElement('div');r.id='printReport';r.className='printOnly printReport';
  r.innerHTML=`<div class="printHeader">${db.club.logo?`<img src="${db.club.logo}">`:''}<div><h1>${esc(db.club.name||'Mi Club Deportivo')}</h1><h2>${esc(title)}</h2><div class="printMeta">${esc(subtitle)}</div></div></div>${body}<div class="printFoot">Generado desde ${esc(db.appName)} · ${new Date().toLocaleString('es-CO')}</div>`;
  document.body.appendChild(r);
- const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
- if(!isMobile){
-   const app=document.querySelector('.app');
-   const modal=document.getElementById('modal');
-   const prevApp=app?app.style.display:'';
-   const prevModal=modal?modal.style.display:'';
-   if(app)app.style.display='none';
-   if(modal)modal.style.display='none';
-   r.style.display='block';
-   const restore=()=>{
-     if(app)app.style.display=prevApp;
-     if(modal)modal.style.display=prevModal;
-     if(r.parentNode)r.remove();
-   };
-   window.onafterprint=restore;
-   setTimeout(()=>{try{window.print()}catch(e){restore();alert('No fue posible abrir la impresión/PDF en este navegador.')}},120);
-   return;
- }
- // En móviles: mostrar primero una vista previa HTML. No descarga ni abre un PDF automáticamente.
- r.classList.remove('printOnly');
+ const app=document.querySelector('.app');
+ const modal=document.getElementById('modal');
+ const prevApp=app?app.style.display:'';
+ const prevModal=modal?modal.style.display:'';
+ if(app)app.style.display='none';
+ if(modal)modal.style.display='none';
  r.style.display='block';
- r.style.position='fixed';r.style.inset='0';r.style.zIndex='99999';
- r.style.background='#fff';r.style.overflow='auto';r.style.padding='56px 12px 90px';
- r.style.webkitOverflowScrolling='touch';
- const bar=document.createElement('div');
- bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:100000;background:#111827;color:white;padding:10px 12px;display:flex;gap:8px;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.25)';
- bar.innerHTML=`<button id="closePreview" style="border:0;border-radius:8px;padding:9px 12px;background:#374151;color:#fff;font-size:14px">✕ Cerrar</button><div style="font-weight:700">Vista previa</div><div style="display:flex;gap:6px"><button id="sharePreview" style="border:0;border-radius:8px;padding:9px 10px;background:#2563eb;color:#fff;font-size:14px">↗ Compartir</button><button id="downloadPreview" style="border:0;border-radius:8px;padding:9px 10px;background:#059669;color:#fff;font-size:14px">⬇ PDF</button></div>`;
- document.body.appendChild(bar);
- document.getElementById('closePreview').onclick=()=>{bar.remove();r.remove()};
- const makePdf=async()=>{
-   if(typeof html2pdf==='undefined') throw new Error('PDF library unavailable');
-   const clone=r.cloneNode(true);
-   clone.style.position='static';clone.style.inset='auto';clone.style.overflow='visible';clone.style.padding='20px';clone.style.background='#fff';
-   clone.querySelectorAll('button').forEach(x=>x.remove());
-   const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-100000px;top:0;width:1120px;background:#fff;';wrap.appendChild(clone);document.body.appendChild(wrap);
-   try{
-     const blob=await html2pdf().set({margin:8,filename:'ClubGestor.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy']}}).from(clone).outputPdf('blob');
-     return blob;
-   }finally{wrap.remove()}
+ const restore=()=>{
+   if(app)app.style.display=prevApp;
+   if(modal)modal.style.display=prevModal;
+   if(r.parentNode)r.remove();
  };
- document.getElementById('downloadPreview').onclick=async()=>{
-   try{const blob=await makePdf();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(title||'ClubGestor')+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}catch(e){alert('No fue posible generar el PDF. Verifica tu conexión a Internet e inténtalo de nuevo.')}};
- document.getElementById('sharePreview').onclick=async()=>{
-   try{
-     const blob=await makePdf();
-     const file=new File([blob],(title||'ClubGestor')+'.pdf',{type:'application/pdf'});
-     if(navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title||'ClubGestor',text:subtitle||''});}
-     else if(navigator.share){await navigator.share({title:title||'ClubGestor',text:subtitle||''});}
-     else alert('Este navegador no permite compartir archivos PDF directamente. Usa el botón PDF para guardarlo y luego compártelo desde Descargas.');
-   }catch(e){if(e.name!=='AbortError')alert('No fue posible compartir el PDF en este dispositivo.');}
- };
+ window.onafterprint=restore;
+ setTimeout(()=>{
+   try{window.print()}catch(e){restore();alert('No fue posible abrir la ventana de impresión/PDF en este navegador.')}
+ },120);
 }
 
 function athletes(){
@@ -292,8 +289,10 @@ function renderAthletes(){
 document.addEventListener('input',e=>{if(e.target.id==='athSearch')renderAthletes()});
 
 function openAthlete(existing=null){
- const a=existing||{name:'',docType:'Cédula',document:'',birth:'',weight:'',height:'',sport:'Fútbol',otherSport:'',category:'',address:'',phone:'',eps:''};
+ const a=existing||{name:'',docType:'Cédula',document:'',birth:'',weight:'',height:'',sport:'Fútbol',otherSport:'',category:'',address:'',phone:'',eps:'',photo:''};
+ pendingAthletePhoto=a.photo||'';
  const ac=ageCategory(a);
+ const photoHtml=pendingAthletePhoto?`<img class="athletePhotoPreview" src="${pendingAthletePhoto}" alt="Foto del deportista">`:'<div class="athletePhotoPlaceholder">Sin foto</div>';
  openModal(existing?'Editar deportista':'Nuevo deportista',`<div class="formgrid">
  <div class="field span2"><label>Nombre completo *</label><input id="aName" value="${esc(a.name)}"></div>
  <div class="field"><label>Tipo de documento *</label><select id="aDocType"><option ${a.docType==='Cédula'?'selected':''}>Cédula</option><option ${a.docType==='Tarjeta de identidad'?'selected':''}>Tarjeta de identidad</option><option ${a.docType==='Pasaporte'?'selected':''}>Pasaporte</option><option ${a.docType==='Otro'?'selected':''}>Otro</option></select></div>
@@ -308,16 +307,35 @@ function openAthlete(existing=null){
  <div class="field span2"><label>Dirección</label><input id="aAddress" value="${esc(a.address)}"></div>
  <div class="field"><label>Celular</label><input id="aPhone" value="${esc(a.phone)}"></div>
  <div class="field"><label>EPS</label><input id="aEps" value="${esc(a.eps)}"></div>
- </div><div class="card" style="margin-top:8px"><b>Clasificación:</b> <span id="catPreview">${esc(ac.category)}</span> · <span id="agePreview">${ac.age??'—'} años</span></div>`,
- ()=>{
-  const x={...a,id:a.id||uid('ath'),name:document.getElementById('aName').value.trim(),docType:document.getElementById('aDocType').value,document:document.getElementById('aDoc').value.trim(),birth:document.getElementById('aBirth').value,weight:document.getElementById('aWeight').value,height:document.getElementById('aHeight').value,sport:document.getElementById('aSport').value,otherSport:document.getElementById('aOtherSport').value.trim(),category:categoryFromAge(ageFromBirth(document.getElementById('aBirth').value)),address:document.getElementById('aAddress').value.trim(),phone:document.getElementById('aPhone').value.trim(),eps:document.getElementById('aEps').value.trim()};
-  if(!x.name||!x.document)return alert('Nombre y número de documento son obligatorios.');
-  if(x.sport==='Otro deporte'&&!x.otherSport)return alert('Indique cuál es el otro deporte.');
-  if(existing)db.athletes=db.athletes.map(z=>z.id===a.id?x:z);else db.athletes.push(x);
-  save();closeModal();render();
+ </div>
+ <div class="card athletePhotoBox">
+   <div id="aPhotoPreview">${photoHtml}</div>
+   <div>
+     <b>Foto del deportista</b>
+     <p class="muted" style="margin:4px 0 9px">La foto no aparece en la tabla. Solo se muestra en la ficha y en el PDF individual.</p>
+     <div class="photoButtons">
+       <button type="button" onclick="document.getElementById('aPhotoFile').click()">📁 Subir foto</button>
+       <button type="button" onclick="document.getElementById('aPhotoCamera').click()">📷 Tomar foto</button>
+       <button type="button" onclick="removeAthletePhoto()">🗑️ Quitar</button>
+     </div>
+     <input id="aPhotoFile" type="file" accept="image/*" style="display:none" onchange="handleAthletePhoto(this)">
+     <input id="aPhotoCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleAthletePhoto(this)">
+   </div>
+ </div>
+ <div class="card" style="margin-top:8px"><b>Clasificación:</b> <span id="catPreview">${esc(ac.category)}</span> · <span id="agePreview">${ac.age??'—'} años</span></div>`,
+ async ()=>{
+  const btn=document.getElementById('modalSave');btn.disabled=true;btn.textContent='Guardando…';
+  try{
+   const x={...a,id:a.id||uid('ath'),name:document.getElementById('aName').value.trim(),docType:document.getElementById('aDocType').value,document:document.getElementById('aDoc').value.trim(),birth:document.getElementById('aBirth').value,weight:document.getElementById('aWeight').value,height:document.getElementById('aHeight').value,sport:document.getElementById('aSport').value,otherSport:document.getElementById('aOtherSport').value.trim(),category:categoryFromAge(ageFromBirth(document.getElementById('aBirth').value)),address:document.getElementById('aAddress').value.trim(),phone:document.getElementById('aPhone').value.trim(),eps:document.getElementById('aEps').value.trim(),photo:pendingAthletePhoto||''};
+   if(!x.name||!x.document)return alert('Nombre y número de documento son obligatorios.');
+   if(x.sport==='Otro deporte'&&!x.otherSport)return alert('Indique cuál es el otro deporte.');
+   if(existing)db.athletes=db.athletes.map(z=>z.id===a.id?x:z);else db.athletes.push(x);
+   save();closeModal();render();
+  }finally{btn.disabled=false;btn.textContent='Guardar';}
  });
  document.getElementById('aSport').value=a.sport||'Fútbol';
 }
+
 function previewAgeCategory(){const age=ageFromBirth(document.getElementById('aBirth').value),cat=categoryFromAge(age);document.getElementById('aAge').value=age??'';document.getElementById('aCat').value=cat;document.getElementById('agePreview').textContent=(age??'—')+' años';document.getElementById('catPreview').textContent=cat}
 
 function viewAthlete(id){
@@ -326,14 +344,15 @@ function viewAthlete(id){
  const ac=ageCategory(a);
  const sport=(a.sport==='Otro deporte'?(a.otherSport||'Otro deporte'):a.sport);
  const row=(label,value,cls='')=>`<div class="viewRow ${cls}"><div class="viewLabel">${label}</div><div class="viewValue">${value||'—'}</div></div>`;
+ const photo=a.photo?`<img class="athleteViewPhoto" src="${a.photo}" alt="Foto de ${esc(a.name)}">`:'<div class="athletePhotoPlaceholder">Sin foto</div>';
  openModal(
   'Ficha del deportista',
-  `<div class="athleteProfileHead">
-    <div>
+  `<div class="athleteViewTop">
+    ${photo}
+    <div style="flex:1;min-width:180px">
       <div class="athleteProfileName">${esc(a.name)}</div>
       <div class="athleteProfileSub">${esc(sport)} · ${esc(ac.category)} · ${ac.age??'—'} años</div>
     </div>
-    <span class="pill green">${esc(ac.category)}</span>
   </div>
   <div class="viewCard">
     ${row('NOMBRE',esc(a.name))}
