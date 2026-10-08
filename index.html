@@ -68,6 +68,7 @@ input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;
   <div class="modalfoot"><button type="button" onclick="closeModal()">Cancelar</button><button class="primary" id="modalSave">Guardar</button></div>
 </div></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 const KEY='clubgestor_local_v3';
 const oldKey='clubgestor_v2';
@@ -203,22 +204,56 @@ function printShell(title,subtitle,body){
  const r=document.createElement('div');r.id='printReport';r.className='printOnly printReport';
  r.innerHTML=`<div class="printHeader">${db.club.logo?`<img src="${db.club.logo}">`:''}<div><h1>${esc(db.club.name||'Mi Club Deportivo')}</h1><h2>${esc(title)}</h2><div class="printMeta">${esc(subtitle)}</div></div></div>${body}<div class="printFoot">Generado desde ${esc(db.appName)} · ${new Date().toLocaleString('es-CO')}</div>`;
  document.body.appendChild(r);
- const app=document.querySelector('.app');
- const modal=document.getElementById('modal');
- const prevApp=app?app.style.display:'';
- const prevModal=modal?modal.style.display:'';
- if(app)app.style.display='none';
- if(modal)modal.style.display='none';
  r.style.display='block';
- const restore=()=>{
-   if(app)app.style.display=prevApp;
-   if(modal)modal.style.display=prevModal;
-   if(r.parentNode)r.remove();
+
+ // En celular generamos un PDF real y lo abrimos en el visor del dispositivo.
+ // Así se puede ampliar/reducir con el gesto de dos dedos.
+ const pdfWindow=window.open('about:blank','_blank');
+ const fallbackPrint=()=>{
+   if(pdfWindow&&!pdfWindow.closed){try{pdfWindow.close()}catch(e){}}
+   const app=document.querySelector('.app');
+   const modal=document.getElementById('modal');
+   const prevApp=app?app.style.display:'';
+   const prevModal=modal?modal.style.display:'';
+   if(app)app.style.display='none';
+   if(modal)modal.style.display='none';
+   window.onafterprint=()=>{
+     if(app)app.style.display=prevApp;
+     if(modal)modal.style.display=prevModal;
+     if(r.parentNode)r.remove();
+   };
+   try{window.print()}catch(e){
+     if(r.parentNode)r.remove();
+     alert('No fue posible abrir el PDF en este navegador.');
+   }
  };
- window.onafterprint=restore;
- setTimeout(()=>{
-   try{window.print()}catch(e){restore();alert('No fue posible abrir la ventana de impresión/PDF en este navegador.')}
- },120);
+
+ if(!window.html2pdf){fallbackPrint();return;}
+
+ const safeName=(title||'ClubGestor').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ -]/g,'').trim().replace(/\s+/g,'_')||'ClubGestor';
+ const options={
+   margin:[8,8,8,8],
+   filename:`${safeName}.pdf`,
+   image:{type:'jpeg',quality:0.98},
+   html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},
+   jsPDF:{unit:'mm',format:'a4',orientation:'landscape',compress:true},
+   pagebreak:{mode:['css','legacy']}
+ };
+
+ html2pdf().set(options).from(r).outputPdf('blob').then(blob=>{
+   if(!blob)throw new Error('No se pudo generar el PDF');
+   const url=URL.createObjectURL(blob);
+   if(pdfWindow&&!pdfWindow.closed){
+     pdfWindow.location.href=url;
+   }else{
+     const a=document.createElement('a');a.href=url;a.download=`${safeName}.pdf`;document.body.appendChild(a);a.click();a.remove();
+   }
+   setTimeout(()=>{if(r.parentNode)r.remove();},1000);
+   setTimeout(()=>URL.revokeObjectURL(url),60000);
+ }).catch(err=>{
+   console.error('Error generando PDF:',err);
+   fallbackPrint();
+ });
 }
 
 function athletes(){
