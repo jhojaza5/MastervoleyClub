@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title id="docTitle">ClubGestor V2 — Gestión Deportiva</title>
+<title id="docTitle">ClubGestor — Gestión Deportiva</title>
+<!-- ClubGestor: tabla completa con desplazamiento horizontal + ficha individual -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111827">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,8 +24,27 @@ input,select{width:100%;padding:10px;border:1px solid #cfd8d1;border-radius:8px;
 .modal{position:fixed;inset:0;background:#10251a99;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:#fff;border-radius:14px;padding:20px;width:min(820px,100%);max-height:92vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0 0 16px}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
 .logoBox{display:flex;align-items:center;gap:15px}.logoPreview{width:80px;height:80px;object-fit:contain;border:1px dashed #aab6ad;border-radius:12px;background:#fafcfb}.clubHero{display:flex;align-items:center;gap:15px}.clubHero img{width:70px;height:70px;object-fit:contain;border-radius:12px}
 .attMatrix th,.attMatrix td{text-align:center;white-space:nowrap;padding:7px 5px}.attMatrix th:first-child,.attMatrix td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:2}.attDay{min-width:48px;line-height:1.15}.attDay small{display:block;font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase}.attDay.sunday{background:#fef2f2;color:#991b1b}.attDay.saturday{background:#fff7ed;color:#9a3412}.attCell{width:34px;height:32px;padding:0;border-radius:7px;font-size:11px;font-weight:800}.attP{background:#dcfce7;color:#166534;border-color:#bbf7d0}.attA{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.attE{background:#fef3c7;color:#92400e;border-color:#fde68a}.attR{background:#ffedd5;color:#9a3412;border-color:#fed7aa}.attEmpty{background:#f3f4f6;color:#6b7280;border-color:#e5e7eb}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:10px}
+.athleteProfileHead{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 16px;margin-bottom:12px;background:#f7faf8;border:1px solid var(--line);border-radius:12px}.athleteProfileName{font-size:22px;font-weight:800}.athleteProfileSub{margin-top:4px;color:var(--muted);font-size:13px}.viewCard{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}.viewRow{display:grid;grid-template-columns:190px minmax(0,1fr);align-items:center;border-bottom:1px solid #edf1ee;min-height:50px}.viewRow:last-child{border-bottom:0}.viewLabel{padding:11px 14px;font-size:12px;font-weight:700;color:#526158;background:#fafcfb}.viewValue{padding:11px 14px;font-size:15px;text-align:right;overflow-wrap:anywhere}.viewActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 .printOnly{display:none}.printReport{font-family:Arial,sans-serif;color:#111}.printHeader{display:flex;align-items:center;gap:14px;border-bottom:2px solid #166534;padding-bottom:10px;margin-bottom:14px}.printHeader img{width:70px;height:70px;object-fit:contain}.printReport h1{margin:0;font-size:22px}.printReport h2{margin:4px 0 2px;font-size:17px}.printMeta,.printFoot{font-size:10px;color:#555}.printReport table{min-width:0;width:100%;border-collapse:collapse;table-layout:auto}.printReport th,.printReport td{border:1px solid #bbb;padding:5px 4px;font-size:8.5px;text-align:center}.printReport th{background:#eee}.printReport td:first-child,.printReport th:first-child{text-align:left}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}}@media(max-width:650px){.app{display:block}.sidebar{position:static;width:100%}.main{margin:0;width:100%;padding:14px}.grid,.grid2,.formgrid{grid-template-columns:1fr}.span2{grid-column:auto}.top{display:block}.actions{margin-top:10px}.nav{display:grid;grid-template-columns:1fr 1fr}}
+
+/* En celular, la tabla de deportistas conserva su formato completo y se desplaza horizontalmente. */
+.athleteTableWrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.athleteTable{min-width:1500px}
+@media(max-width:650px){
+  .athleteTableWrap{overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);background:#fff}
+  .athleteTable{display:table;min-width:1500px !important;width:max-content !important}
+  .athleteTable thead{display:table-header-group}
+  .athleteTable tbody{display:table-row-group}
+  .athleteTable tr{display:table-row;background:transparent;border:0;border-radius:0;margin:0;padding:0;box-shadow:none}
+  .athleteTable td,.athleteTable th{display:table-cell;width:auto;min-width:0;border-bottom:1px solid var(--line);padding:10px 11px;font-size:13px;text-align:left;vertical-align:middle}
+  .athleteTable td::before{display:none !important}
+  .athleteTable td:nth-child(13){display:table-cell;padding:10px 11px}
+  .athleteTable td:nth-child(13) > div{display:flex !important;grid-template-columns:none;gap:5px !important;flex-wrap:wrap}
+  .athleteTable td:nth-child(13) button{width:auto;min-height:40px;white-space:nowrap}
+  #athSearch{width:100% !important}
+}
+
 @media print{body{background:#fff!important}.app,.modal{display:none!important}.printOnly{display:block!important}.printReport{width:100%;padding:0;margin:0}.printReport table{page-break-inside:auto}.printReport tr{page-break-inside:avoid}.printReport thead{display:table-header-group}@page{size:A4 landscape;margin:8mm}}
 </style>
 </head>
@@ -182,13 +202,29 @@ function printShell(title,subtitle,body){
  const old=document.getElementById('printReport');if(old)old.remove();
  const r=document.createElement('div');r.id='printReport';r.className='printOnly printReport';
  r.innerHTML=`<div class="printHeader">${db.club.logo?`<img src="${db.club.logo}">`:''}<div><h1>${esc(db.club.name||'Mi Club Deportivo')}</h1><h2>${esc(title)}</h2><div class="printMeta">${esc(subtitle)}</div></div></div>${body}<div class="printFoot">Generado desde ${esc(db.appName)} · ${new Date().toLocaleString('es-CO')}</div>`;
- document.body.appendChild(r);window.print();setTimeout(()=>r.remove(),700);
+ document.body.appendChild(r);
+ const app=document.querySelector('.app');
+ const modal=document.getElementById('modal');
+ const prevApp=app?app.style.display:'';
+ const prevModal=modal?modal.style.display:'';
+ if(app)app.style.display='none';
+ if(modal)modal.style.display='none';
+ r.style.display='block';
+ const restore=()=>{
+   if(app)app.style.display=prevApp;
+   if(modal)modal.style.display=prevModal;
+   if(r.parentNode)r.remove();
+ };
+ window.onafterprint=restore;
+ setTimeout(()=>{
+   try{window.print()}catch(e){restore();alert('No fue posible abrir la ventana de impresión/PDF en este navegador.')}
+ },120);
 }
 
 function athletes(){
  document.getElementById('app').innerHTML=header('Deportistas','Base de datos completa de los integrantes del club',`<button onclick="printAllAthletesPDF()">📄 PDF base de datos</button><button class="primary" onclick="openAthlete()">+ Nuevo deportista</button>`)
  +`<div class="toolbar"><div class="left"><input id="athSearch" placeholder="Buscar por nombre, documento o deporte..." style="width:320px"></div><span class="muted">${db.athletes.length} deportistas</span></div>
- <div class="tablewrap"><table><thead><tr><th>Nombre completo</th><th>Tipo documento</th><th>Número documento</th><th>Nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
+ <div class="tablewrap athleteTableWrap"><table class="athleteTable"><thead><tr><th>Nombre completo</th><th>Tipo documento</th><th>Número documento</th><th>Nacimiento</th><th>Edad</th><th>Peso</th><th>Talla</th><th>Deporte</th><th>Categoría</th><th>Dirección</th><th>Celular</th><th>EPS</th><th>Acciones</th></tr></thead><tbody id="athBody"></tbody></table></div>`;
  renderAthletes();
 }
 function renderAthletes(){
@@ -252,25 +288,34 @@ function viewAthlete(id){
  const a=db.athletes.find(x=>x.id===id);
  if(!a)return;
  const ac=ageCategory(a);
+ const sport=(a.sport==='Otro deporte'?(a.otherSport||'Otro deporte'):a.sport);
+ const row=(label,value,cls='')=>`<div class="viewRow ${cls}"><div class="viewLabel">${label}</div><div class="viewValue">${value||'—'}</div></div>`;
  openModal(
-  'Ficha completa del deportista',
-  `<div class="card" style="margin-bottom:12px">
-    <h3 style="margin-top:0">${esc(a.name)}</h3>
-    <div class="muted">${esc(ac.category)} · ${ac.age??'—'} años</div>
+  'Ficha del deportista',
+  `<div class="athleteProfileHead">
+    <div>
+      <div class="athleteProfileName">${esc(a.name)}</div>
+      <div class="athleteProfileSub">${esc(sport)} · ${esc(ac.category)} · ${ac.age??'—'} años</div>
+    </div>
+    <span class="pill green">${esc(ac.category)}</span>
   </div>
-  <div class="formgrid">
-    <div class="field"><label>Nombre completo</label><input value="${esc(a.name)}" readonly></div>
-    <div class="field"><label>Tipo de documento</label><input value="${esc(a.docType||'')}" readonly></div>
-    <div class="field"><label>Número de documento</label><input value="${esc(a.document||'')}" readonly></div>
-    <div class="field"><label>Fecha de nacimiento</label><input value="${esc(a.birth||'')}" readonly></div>
-    <div class="field"><label>Edad</label><input value="${ac.age??'—'} años" readonly></div>
-    <div class="field"><label>Categoría automática</label><input value="${esc(ac.category)}" readonly></div>
-    <div class="field"><label>Peso</label><input value="${esc(a.weight||'')} kg" readonly></div>
-    <div class="field"><label>Talla</label><input value="${esc(a.height||'')} cm" readonly></div>
-    <div class="field"><label>Deporte</label><input value="${esc(a.sport==='Otro deporte'?a.otherSport:a.sport)}" readonly></div>
-    <div class="field"><label>Celular</label><input value="${esc(a.phone||'')}" readonly></div>
-    <div class="field span2"><label>Dirección</label><input value="${esc(a.address||'')}" readonly></div>
-    <div class="field span2"><label>EPS</label><input value="${esc(a.eps||'')}" readonly></div>
+  <div class="viewCard">
+    ${row('NOMBRE',esc(a.name))}
+    ${row('TIPO DOCUMENTO',esc(a.docType||'—'))}
+    ${row('NÚMERO DOCUMENTO',esc(a.document||'—'))}
+    ${row('NACIMIENTO',esc(a.birth||'—'))}
+    ${row('EDAD',`${ac.age??'—'} años`)}
+    ${row('PESO',a.weight?esc(a.weight)+' kg':'—')}
+    ${row('TALLA',a.height?esc(a.height)+' cm':'—')}
+    ${row('DEPORTE',esc(sport))}
+    ${row('CATEGORÍA',`<span class="pill green">${esc(ac.category)}</span>`)}
+    ${row('DIRECCIÓN',esc(a.address||'—'))}
+    ${row('CELULAR',esc(a.phone||'—'))}
+    ${row('EPS',esc(a.eps||'—'))}
+  </div>
+  <div class="viewActions">
+    <button type="button" onclick="editAthlete('${a.id}');">✏️ Editar ficha</button>
+    <button type="button" onclick="printAthletePDF('${a.id}')">📄 PDF</button>
   </div>`,
   ()=>closeModal()
  );
